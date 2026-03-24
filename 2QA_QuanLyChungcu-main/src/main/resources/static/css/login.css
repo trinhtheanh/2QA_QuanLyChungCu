@@ -214,3 +214,17 @@ button:active {
         padding: 24px 20px 28px;
     }
 }
+
+
+.google-login-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4285F4;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.google-login-btn:hover {
+    background-color: #357ae8;
+}

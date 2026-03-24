@@ -8,7 +8,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 @Data
-@Entity
+@Entity//
 public class ChungCu {
     @Id
     @NotNull(message = "Mã chung cư (ID) không được để trống")

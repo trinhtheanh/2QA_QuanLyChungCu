@@ -39,6 +39,7 @@
 
         <!-- Thong bao dang nhap -->
         <div th:if="${param.error}" class="error-msg">Sai tai khoan hoac mat khau!</div>
+        <div th:if="${param.oauth2error}" class="error-msg">Dang nhap Google that bai. Tai khoan Google khong co email hop le.</div>
         <div th:if="${param.logout}" class="logout-msg">Ban da dang xuat thanh cong.</div>
 
         <!-- Thong bao dang ky -->
@@ -62,9 +63,15 @@
             </div>
 
             <button type="submit">Dang nhap</button>
+            <div style="margin-top:12px;">
+                <a th:href="@{/oauth2/authorization/google}"
+                   style="display:block;text-align:center;padding:10px 12px;border-radius:10px;border:1px solid #d1d5db;background:#ffffff;color:#111827;text-decoration:none;font-weight:600;">
+                    Dang nhap voi Google
+                </a>
+            </div>
         </form>
 
-        <!-- Form DANG KY -->
+        <!-- Form DANG KY /////-->
         <form id="register-form" class="form-panel" th:action="@{/register}" method="post">
             <h2>Tao tai khoan moi</h2>
             <p class="subtitle">Dang ky tai khoan quan tri chung cu.</p>
