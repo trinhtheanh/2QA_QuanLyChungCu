@@ -2,6 +2,7 @@ package phattrienungdungvoij2ee.bai5_qlsp_jpa.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentFeeType;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.ApartmentFeeTypeRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Order(1)
 public class ApartmentFeeTypeSeeder implements CommandLineRunner {
 
     @Autowired
