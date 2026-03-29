@@ -104,18 +104,6 @@
 </div>
 
 <script th:src="@{/js/product.js}" defer></script>
-<script>
-    function previewServiceImage(event) {
-        const reader = new FileReader();
-        reader.onload = function() {
-            const output = document.getElementById('previewImg');
-            const icon = document.getElementById('placeholderIcon');
-            output.src = reader.result;
-            output.style.display = 'block';
-            icon.style.display = 'none';
-        };
-        reader.readAsDataURL(event.target.files[0]);
-    }
-</script>
+<script th:src="@{/js/service-image-preview.js}" defer></script>
 </body>
 </html>
