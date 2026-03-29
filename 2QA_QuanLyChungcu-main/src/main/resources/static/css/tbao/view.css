@@ -1,0 +1,75 @@
+:root {
+        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        --bg-body: #f1f5f9;
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    }
+
+    body { background-color: var(--bg-body); }
+
+    /* Hero Section hiện đại hơn */
+    .tb-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #1e40af 50%, #3b82f6 100%);
+        border-radius: 24px; padding: 60px 45px; color: #fff;
+        margin-bottom: 40px; box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2);
+        position: relative; overflow: hidden;
+    }
+
+    .tb-hero h1 { font-weight: 800; font-size: 2.5rem; letter-spacing: -1px; }
+
+    /* Card Thông báo thiết kế lại */
+    .tb-card {
+        background: #ffffff; border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%; display: flex; flex-direction: column;
+        position: relative;
+    }
+
+    .tb-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+
+    /* Stripe màu dày hơn và tinh tế hơn */
+    .card-stripe { height: 6px; width: 100%; border-radius: 20px 20px 0 0; }
+    .stripe-info { background: #3b82f6; }
+    .stripe-warning { background: #f59e0b; }
+    .stripe-secondary { background: #64748b; }
+    .stripe-danger { background: #ef4444; }
+
+    .card-inner { padding: 25px; flex: 1; display: flex; flex-direction: column; }
+
+    .tb-card h5 {
+        font-weight: 700; color: #1e293b; line-height: 1.5;
+        margin-top: 10px; margin-bottom: 12px;
+    }
+
+    .card-desc {
+        font-size: 0.95rem; color: #64748b; line-height: 1.7;
+        flex: 1; margin-bottom: 20px;
+    }
+
+    /* Badge phong cách viên thuốc (Pill) */
+    .badge-modern {
+        padding: 5px 12px; border-radius: 30px; font-weight: 700;
+        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .badge-ghim-modern {
+        background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5;
+        padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
+    }
+
+    /* Footer card */
+    .card-meta {
+        display: flex; justify-content: space-between; align-items: center;
+        padding-top: 15px; border-top: 1px solid #f1f5f9;
+        font-size: 0.85rem; color: #94a3b8;
+    }
+
+    .btn-detail-modern {
+        color: #2563eb; font-weight: 700; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;
+    }
+    .btn-detail-modern:hover { color: #1e40af; gap: 8px; }
