@@ -111,7 +111,7 @@
                   <th>Căn hộ</th>
                   <th>Hình ảnh</th>
                   <th>Giá tham khảo</th>
-                  <th sec:authorize="hasRole('ADMIN')">Hành động</th>
+                  <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -122,10 +122,10 @@
                     <img th:if="${product.image}" th:src="@{${product.image}}" class="apt-img" width="80" height="55">
                   </td>
                   <td class="text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                  <td sec:authorize="hasRole('ADMIN')">
+                  <td>
                     <a th:href="@{/Apartments/detail/{id}(id=${product.id})}" class="btn-action btn-view" style="color: #6366f1; background: #e0e7ff;" title="Xem chi phí chi tiết"><i class="bi bi-eye"></i></a>
-                    <a th:href="@{/Apartments/edit/{id}(id=${product.id})}" class="btn-action btn-edit"><i class="bi bi-pencil-square"></i></a>
-                    <a th:href="@{/Apartments/delete/{id}(id=${product.id})}" class="btn-action btn-delete" onclick="return confirm('Xác nhận xóa?')"><i class="bi bi-trash3"></i></a>
+                    <a sec:authorize="hasRole('ADMIN')" th:href="@{/Apartments/edit/{id}(id=${product.id})}" class="btn-action btn-edit"><i class="bi bi-pencil-square"></i></a>
+                    <a sec:authorize="hasRole('ADMIN')" th:href="@{/Apartments/delete/{id}(id=${product.id})}" class="btn-action btn-delete" onclick="return confirm('Xác nhận xóa?')"><i class="bi bi-trash3"></i></a>
                   </td>
                 </tr>
                 </tbody>
