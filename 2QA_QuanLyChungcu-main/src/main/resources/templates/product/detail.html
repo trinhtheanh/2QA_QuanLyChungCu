@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết căn hộ</title>
+    <style>
+        /* ===== HERO SECTION ===== */
+        .detail-hero {
+            border-radius: 20px;
+            padding: 32px 36px;
+            color: #fff;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            animation: heroSlideIn 0.6s ease-out;
+        }
+        @keyframes heroSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .detail-hero::before {
+            content: '';
+            position: absolute; top: -60%; right: -15%;
+            width: 350px; height: 350px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+        .detail-hero::after {
+            content: '';
+            position: absolute; bottom: -40%; left: -10%;
+            width: 250px; height: 250px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        /* Category gradients */
+        .hero-binh-dan    { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%); }
+        .hero-trung-cap   { background: linear-gradient(135deg, #b45309 0%, #f59e0b 50%, #fbbf24 100%); }
+        .hero-cao-cap     { background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 50%, #c084fc 100%); }
+        .hero-default     { background: linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%); }
+
+        .detail-hero h2 { font-weight: 800; font-size: 1.55rem; margin-bottom: 6px; position: relative; z-index: 1; }
+        .detail-hero .sub-info { opacity: 0.9; font-size: 0.92rem; position: relative; z-index: 1; }
+        .detail-hero .sub-info .info-chip {
+            background: rgba(255,255,255,0.18);
+            padding: 5px 14px; border-radius: 20px;
+            margin-right: 8px; font-size: 0.82rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 5px;
+            backdrop-filter: blur(4px);
+            transition: background 0.2s;
+        }
+        .detail-hero .sub-info .info-chip:hover { background: rgba(255,255,255,0.28); }
+
+        /* ===== CATEGORY BADGE ===== */
+        .category-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px; border-radius: 24px;
+            font-weight: 700; font-size: 0.85rem;
+            position: relative; z-index: 1;
+        }
+        .cat-binh-dan   { background: rgba(59,130,246,0.25); border: 1px solid rgba(59,130,246,0.4); }
+        .cat-trung-cap  { background: rgba(245,158,11,0.25); border: 1px solid rgba(245,158,11,0.4); }
+        .cat-cao-cap    { background: rgba(168,85,247,0.25); border: 1px solid rgba(168,85,247,0.4); }
+        .cat-default    { background: rgba(148,163,184,0.25); border: 1px solid rgba(148,163,184,0.4); }
+
+        /* ===== DASHBOARD CARDS ===== */
+        .dash-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 24px;
+            animation: cardFadeIn 0.5s ease-out both;
+        }
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .dash-card:nth-child(2) { animation-delay: 0.1s; }
+        .dash-card:nth-child(3) { animation-delay: 0.2s; }
+        .dash-card:nth-child(4) { animation-delay: 0.3s; }
+
+        .dash-card-header {
+            padding: 16px 24px;
+            font-weight: 700; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 2px solid #f1f5f9;
+            color: #1e293b;
+        }
+        .dash-card-body { padding: 0; }
+
+        /* ===== FEE TABLE ===== */
+        .fee-table { width: 100%; border-collapse: collapse; }
+        .fee-table thead { background: #f8fafc; }
+        .fee-table thead th {
+            padding: 12px 20px;
+            font-size: 0.78rem; font-weight: 700;
+            color: #64748b; text-transform: uppercase;
+            letter-spacing: 0.6px; border-bottom: 2px solid #e2e8f0;
+        }
+        .fee-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle; color: #334155;
+        }
+        .fee-table tbody tr { transition: background 0.15s; }
+        .fee-table tbody tr:hover { background: #f8fafc; }
+        .fee-name { font-weight: 600; color: #1e293b; }
+        .fee-sub { font-size: 0.76rem; color: #94a3b8; margin-top: 2px; }
+        .fee-amount { font-weight: 700; color: #1e293b; white-space: nowrap; }
+        .fee-type-badge {
+            background: #f1f5f9; color: #475569;
+            padding: 3px 10px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+
+        /* ===== CATEGORY-THEMED COST CARDS ===== */
+        .cost-info-cards { padding: 20px 24px; }
+        .cost-card {
+            background: #f8fafc;
+            border-radius: 14px; padding: 18px 20px;
+            margin-bottom: 14px;
+            border-left: 4px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cost-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .cost-card .cost-label { font-size: 0.82rem; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+        .cost-card .cost-value { font-size: 1.15rem; font-weight: 800; color: #1e293b; }
+        .cost-card .cost-note  { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; }
+
+        /* Bình dân cards */
+        .cost-card.bd-rent   { border-left-color: #3b82f6; }
+        .cost-card.bd-rent .cost-value { color: #1d4ed8; }
+        .cost-card.bd-elec   { border-left-color: #f59e0b; }
+        .cost-card.bd-elec .cost-value { color: #b45309; }
+        .cost-card.bd-water  { border-left-color: #06b6d4; }
+        .cost-card.bd-water .cost-value { color: #0891b2; }
+
+        /* Trung cấp cards */
+        .cost-card.tc-rent   { border-left-color: #f59e0b; }
+        .cost-card.tc-rent .cost-value { color: #b45309; }
+        .cost-card.tc-elec   { border-left-color: #ef4444; }
+        .cost-card.tc-elec .cost-value { color: #dc2626; }
+        .cost-card.tc-water  { border-left-color: #14b8a6; }
+        .cost-card.tc-water .cost-value { color: #0d9488; }
+
+        /* Cao cấp cards */
+        .cost-card.cc-rent   { border-left-color: #8b5cf6; }
+        .cost-card.cc-rent .cost-value { color: #7c3aed; }
+        .cost-card.cc-elec   { border-left-color: #f43f5e; }
+        .cost-card.cc-elec .cost-value { color: #e11d48; }
+        .cost-card.cc-water  { border-left-color: #0ea5e9; }
+        .cost-card.cc-water .cost-value { color: #0284c7; }
+
+        /* ===== SERVICE SECTION ===== */
+        .svc-badge { background:#ede9fe; color:#7c3aed; }
+        .badge-paid   { background:#dcfce7; color:#16a34a; padding:4px 12px; border-radius:12px; font-size:0.73rem; font-weight:700; }
+        .badge-unpaid { background:#fee2e2; color:#dc2626; padding:4px 12px; border-radius:12px; font-size:0.73rem; font-weight:700; }
+
+        .svc-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+        .svc-item:last-child { border-bottom: none; }
+        .svc-item:hover { background: #f8fafc; }
+        .svc-item .svc-info { display: flex; align-items: center; gap: 12px; }
+        .svc-icon-circle {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #7c3aed;
+        }
+        .svc-name { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+        .svc-status { font-size: 0.78rem; margin-top: 2px; }
+        .svc-price { font-weight: 700; color: #1e293b; font-size: 0.95rem; white-space: nowrap; }
+
+        /* ===== RESIDENT SECTION ===== */
+        .resident-section {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin-bottom: 28px;
+            border: 1px solid #f1f5f9;
+            animation: cardFadeIn 0.5s ease-out both;
+        }
+        .resident-header {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            font-weight: 700; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* ===== TOTAL ROWS ===== */
+        .total-row td {
+            padding: 18px 20px !important;
+            border-top: 2px solid #e2e8f0 !important;
+            border-bottom: none !important;
+        }
+        .total-row .fee-name { font-size: 1rem; }
+        .total-row .fee-amount-green  { font-weight: 800; color: #059669; font-size: 1.1rem; }
+        .total-row .fee-amount-orange { font-weight: 800; color: #d97706; font-size: 1.1rem; }
+        .total-row .fee-amount-teal   { font-weight: 800; color: #0891b2; font-size: 1.15rem; }
+        .grand-total-row td {
+            padding: 20px 20px !important;
+            border-top: 3px solid #1e293b !important;
+            border-bottom: none !important;
+        }
+
+        /* ===== TOTAL BAR ===== */
+        .total-bar {
+            border-radius: 16px; padding: 24px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #fff; margin-top: 8px; margin-bottom: 28px;
+        }
+        .total-bar-binh-dan { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+        .total-bar-trung-cap { background: linear-gradient(135deg, #b45309, #f59e0b); }
+        .total-bar-cao-cap { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+        .total-bar-default { background: linear-gradient(135deg, #059669, #10b981); }
+        .total-bar .total-label { font-weight: 700; font-size: 1.1rem; }
+        .total-bar .total-amount { font-weight: 800; font-size: 1.5rem; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center; padding: 48px 20px; color: #94a3b8;
+        }
+        .empty-state i { font-size: 3.5rem; display: block; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state p { font-size: 0.92rem; margin: 0; }
+
+        /* ===== SUMMARY CARDS ===== */
+        .sum-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+        .sum-card {
+            flex: 1; min-width: 180px;
+            background: #fff; border-radius: 14px;
+            padding: 20px; text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            animation: cardFadeIn 0.5s ease-out both;
+        }
+        .sum-card:nth-child(1) { animation-delay: 0.1s; }
+        .sum-card:nth-child(2) { animation-delay: 0.2s; }
+        .sum-card:nth-child(3) { animation-delay: 0.3s; }
+        .sum-card:nth-child(4) { animation-delay: 0.4s; }
+        .sum-card:nth-child(5) { animation-delay: 0.5s; }
+        .sum-card .sum-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #fff; margin-bottom: 10px;
+        }
+        .sum-card .sum-value { font-size: 1.3rem; font-weight: 800; color: #1e293b; }
+        .sum-card .sum-label { font-size: 0.78rem; color: #64748b; font-weight: 600; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="container body-content" style="padding-top:24px; padding-bottom:40px;">
+
+    <!-- Back -->
+    <div class="mb-3">
+        <a th:href="@{/Apartments}" class="text-muted" style="text-decoration:none; font-size:0.9rem;">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách căn hộ
+        </a>
+    </div>
+
+    <!-- ========== HERO (Dynamic by category) ========== -->
+    <div th:with="catName=${chungCu.category != null ? chungCu.category.name : ''}"
+         class="detail-hero"
+         th:classappend="${#strings.containsIgnoreCase(catName, 'Bình dân') ? 'hero-binh-dan' : (#strings.containsIgnoreCase(catName, 'Trung cấp') ? 'hero-trung-cap' : (#strings.containsIgnoreCase(catName, 'Cao cấp') ? 'hero-cao-cap' : 'hero-default'))}">
+
+        <h2 style="position:relative;z-index:1;">
+            <i class="bi bi-building me-2"></i>Chi tiết: <span th:text="${chungCu.name}">Tên căn hộ</span>
+        </h2>
+
+        <div class="sub-info mt-3">
+            <span class="info-chip">
+                <i class="bi bi-hash"></i>Mã: <span th:text="${chungCu.maChungCu != null ? chungCu.maChungCu : chungCu.id}"></span>
+            </span>
+            <span class="info-chip">
+                <i class="bi bi-cash-coin"></i><span th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}"></span> VND
+            </span>
+            <span class="info-chip category-badge"
+                  th:classappend="${#strings.containsIgnoreCase(catName, 'Bình dân') ? 'cat-binh-dan' : (#strings.containsIgnoreCase(catName, 'Trung cấp') ? 'cat-trung-cap' : (#strings.containsIgnoreCase(catName, 'Cao cấp') ? 'cat-cao-cap' : 'cat-default'))}"
+                  th:if="${chungCu.category != null}">
+                <i class="bi bi-award-fill"></i><span th:text="${chungCu.category.name}"></span>
+            </span>
+            <span class="info-chip">
+                <i class="bi bi-people-fill"></i><span th:text="${#lists.size(details)}"></span> cư dân
+            </span>
+        </div>
+    </div>
+
+    <!-- ========== PRICING OVERVIEW (Category-based) ========== -->
+    <div th:with="catName=${chungCu.category != null ? chungCu.category.name : ''}">
+
+        <!-- === BÌNH DÂN === -->
+        <div th:if="${#strings.containsIgnoreCase(catName, 'Bình dân')}">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="dash-card">
+                        <div class="dash-card-header" style="color:#1d4ed8;">
+                            <i class="bi bi-house-heart-fill" style="color:#3b82f6;"></i> Bảng giá phân khúc Bình dân
+                        </div>
+                        <div class="cost-info-cards">
+                            <div class="cost-card bd-rent">
+                                <div class="cost-label"><i class="bi bi-key-fill me-1"></i>Giá thuê hàng tháng</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Đã bao gồm VAT 10%</div>
+                            </div>
+                            <div class="cost-card bd-rent">
+                                <div class="cost-label"><i class="bi bi-shield-check me-1"></i>Tiền cọc</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Bằng 1 tháng tiền thuê</div>
+                            </div>
+                            <div class="cost-card bd-elec">
+                                <div class="cost-label"><i class="bi bi-lightning-charge-fill me-1"></i>Tiền điện</div>
+                                <div class="cost-value">3,500 VND / kWh</div>
+                                <div class="cost-note">Giá điện sinh hoạt bậc thang</div>
+                            </div>
+                            <div class="cost-card bd-water">
+                                <div class="cost-label"><i class="bi bi-droplet-fill me-1"></i>Tiền nước</div>
+                                <div class="cost-value">15,000 VND / m³</div>
+                                <div class="cost-note">Giá nước sinh hoạt tiêu chuẩn</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Stats -->
+                <div class="col-lg-8">
+                    <div class="sum-row h-100">
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Giá thuê (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#64748b,#475569);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Tiền cọc (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                            </div>
+                            <div class="sum-value">3,500</div>
+                            <div class="sum-label">Điện (VND/kWh)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">
+                                <i class="bi bi-droplet-fill"></i>
+                            </div>
+                            <div class="sum-value">15,000</div>
+                            <div class="sum-label">Nước (VND/m³)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#lists.size(details)}">0</div>
+                            <div class="sum-label">Cư dân đăng ký</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === TRUNG CẤP === -->
+        <div th:if="${#strings.containsIgnoreCase(catName, 'Trung cấp')}">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="dash-card">
+                        <div class="dash-card-header" style="color:#b45309;">
+                            <i class="bi bi-star-half" style="color:#f59e0b;"></i> Bảng giá phân khúc Trung cấp
+                        </div>
+                        <div class="cost-info-cards">
+                            <div class="cost-card tc-rent">
+                                <div class="cost-label"><i class="bi bi-key-fill me-1"></i>Giá thuê hàng tháng</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Đã bao gồm VAT 10%</div>
+                            </div>
+                            <div class="cost-card tc-rent">
+                                <div class="cost-label"><i class="bi bi-shield-check me-1"></i>Tiền cọc</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Bằng 1 tháng tiền thuê</div>
+                            </div>
+                            <div class="cost-card tc-elec">
+                                <div class="cost-label"><i class="bi bi-lightning-charge-fill me-1"></i>Tiền điện</div>
+                                <div class="cost-value">4,000 VND / kWh</div>
+                                <div class="cost-note">Giá điện chung cư trung cấp</div>
+                            </div>
+                            <div class="cost-card tc-water">
+                                <div class="cost-label"><i class="bi bi-droplet-fill me-1"></i>Tiền nước</div>
+                                <div class="cost-value">20,000 VND / m³</div>
+                                <div class="cost-note">Giá nước chung cư trung cấp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="sum-row h-100">
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#f59e0b,#b45309);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Giá thuê (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#64748b,#475569);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Tiền cọc (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                            </div>
+                            <div class="sum-value">4,000</div>
+                            <div class="sum-label">Điện (VND/kWh)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">
+                                <i class="bi bi-droplet-fill"></i>
+                            </div>
+                            <div class="sum-value">20,000</div>
+                            <div class="sum-label">Nước (VND/m³)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#lists.size(details)}">0</div>
+                            <div class="sum-label">Cư dân đăng ký</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === CAO CẤP === -->
+        <div th:if="${#strings.containsIgnoreCase(catName, 'Cao cấp')}">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="dash-card">
+                        <div class="dash-card-header" style="color:#7c3aed;">
+                            <i class="bi bi-gem" style="color:#a855f7;"></i> Bảng giá phân khúc Cao cấp
+                        </div>
+                        <div class="cost-info-cards">
+                            <div class="cost-card cc-rent">
+                                <div class="cost-label"><i class="bi bi-key-fill me-1"></i>Giá thuê hàng tháng</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Đã bao gồm VAT 10%</div>
+                            </div>
+                            <div class="cost-card cc-rent">
+                                <div class="cost-label"><i class="bi bi-shield-check me-1"></i>Tiền cọc</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                                <div class="cost-note">Bằng 1 tháng tiền thuê</div>
+                            </div>
+                            <div class="cost-card cc-elec">
+                                <div class="cost-label"><i class="bi bi-lightning-charge-fill me-1"></i>Tiền điện</div>
+                                <div class="cost-value">5,000 VND / kWh</div>
+                                <div class="cost-note">Giá điện cao cấp toàn phần</div>
+                            </div>
+                            <div class="cost-card cc-water">
+                                <div class="cost-label"><i class="bi bi-droplet-fill me-1"></i>Tiền nước</div>
+                                <div class="cost-value">25,000 VND / m³</div>
+                                <div class="cost-note">Giá nước cao cấp, đã lọc RO</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="sum-row h-100">
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Giá thuê (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#64748b,#475569);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Tiền cọc (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                            </div>
+                            <div class="sum-value">5,000</div>
+                            <div class="sum-label">Điện (VND/kWh)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+                                <i class="bi bi-droplet-fill"></i>
+                            </div>
+                            <div class="sum-value">25,000</div>
+                            <div class="sum-label">Nước (VND/m³)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="sum-value" th:text="${#lists.size(details)}">0</div>
+                            <div class="sum-label">Cư dân đăng ký</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === DEFAULT (Loại khác) === -->
+        <div th:if="${!#strings.containsIgnoreCase(catName, 'Bình dân') and !#strings.containsIgnoreCase(catName, 'Trung cấp') and !#strings.containsIgnoreCase(catName, 'Cao cấp')}">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-4">
+                    <div class="dash-card">
+                        <div class="dash-card-header" style="color:#475569;">
+                            <i class="bi bi-tag-fill" style="color:#64748b;"></i> Bảng giá chung
+                        </div>
+                        <div class="cost-info-cards">
+                            <div class="cost-card" style="border-left-color:#64748b;">
+                                <div class="cost-label"><i class="bi bi-key-fill me-1"></i>Giá thuê hàng tháng</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                            </div>
+                            <div class="cost-card" style="border-left-color:#64748b;">
+                                <div class="cost-label"><i class="bi bi-shield-check me-1"></i>Tiền cọc</div>
+                                <div class="cost-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+                            </div>
+                            <div class="cost-card" style="border-left-color:#f59e0b;">
+                                <div class="cost-label"><i class="bi bi-lightning-charge-fill me-1"></i>Tiền điện</div>
+                                <div class="cost-value">3,500 VND / kWh</div>
+                            </div>
+                            <div class="cost-card" style="border-left-color:#06b6d4;">
+                                <div class="cost-label"><i class="bi bi-droplet-fill me-1"></i>Tiền nước</div>
+                                <div class="cost-value">15,000 VND / m³</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="sum-row h-100">
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#64748b,#475569);"><i class="bi bi-building"></i></div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Giá thuê (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#64748b,#475569);"><i class="bi bi-shield-check"></i></div>
+                            <div class="sum-value" th:text="${#numbers.formatDecimal(chungCu.price, 0, 'COMMA', 0, 'POINT')}">0</div>
+                            <div class="sum-label">Tiền cọc (VND)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="bi bi-lightning-charge-fill"></i></div>
+                            <div class="sum-value">3,500</div>
+                            <div class="sum-label">Điện (VND/kWh)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);"><i class="bi bi-droplet-fill"></i></div>
+                            <div class="sum-value">15,000</div>
+                            <div class="sum-label">Nước (VND/m³)</div>
+                        </div>
+                        <div class="sum-card">
+                            <div class="sum-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="bi bi-people-fill"></i></div>
+                            <div class="sum-value" th:text="${#lists.size(details)}">0</div>
+                            <div class="sum-label">Cư dân đăng ký</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== EMPTY STATE ========== -->
+    <div th:if="${#lists.isEmpty(details)}" class="empty-state">
+        <i class="bi bi-person-x"></i>
+        <p>Chưa có cư dân nào được gán vào căn hộ này.</p>
+    </div>
+
+    <!-- ========== EACH RESIDENT ========== -->
+    <div th:each="detail, iterStat : ${details}" class="resident-section">
+
+        <!-- Resident Header -->
+        <div class="resident-header">
+            <i class="bi bi-person-fill"></i>
+            <span th:text="${detail.username}">Username</span>
+            <span th:if="${detail.room != null and !#strings.isEmpty(detail.room)}"
+                  style="background:rgba(255,255,255,0.2);padding:3px 12px;border-radius:16px;font-size:0.8rem;">
+                Phòng <span th:text="${detail.room}"></span>
+            </span>
+        </div>
+
+        <!-- Fee Table -->
+        <table class="fee-table">
+            <thead>
+            <tr>
+                <th style="width:30%">Khoản phí</th>
+                <th style="width:16%">Loại</th>
+                <th style="width:10%">SL</th>
+                <th style="width:20%">Đơn giá</th>
+                <th style="width:24%; text-align:right;">Thành tiền</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- 1. Tiền thuê căn hộ -->
+            <tr>
+                <td>
+                    <div class="fee-name"><i class="bi bi-house-heart-fill me-2" style="color:#059669;"></i>Tiền thuê căn hộ</div>
+                    <div class="fee-sub">Hàng tháng</div>
+                </td>
+                <td><span class="fee-type-badge">APARTMENT_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(detail.rentPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(detail.rentPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- 2. Phí bảo trì (2%) -->
+            <tr>
+                <td>
+                    <div class="fee-name"><i class="bi bi-safe-fill me-2" style="color:#0891b2;"></i>Phí bảo trì (2%)</div>
+                    <div class="fee-sub">2% giá trị căn hộ</div>
+                </td>
+                <td><span class="fee-type-badge">APARTMENT_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(detail.deposit, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(detail.deposit, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- 3. Phí quản lý & dịch vụ -->
+            <tr>
+                <td>
+                    <div class="fee-name"><i class="bi bi-gear-wide-connected me-2" style="color:#7c3aed;"></i>Phí quản lý &amp; dịch vụ</div>
+                    <div class="fee-sub">Hàng tháng</div>
+                </td>
+                <td><span class="fee-type-badge">APARTMENT_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(detail.managementFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(detail.managementFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- 4. Điện, nước, internet -->
+            <tr>
+                <td>
+                    <div class="fee-name"><i class="bi bi-lightning-charge-fill me-2" style="color:#f59e0b;"></i>Điện, nước, internet</div>
+                    <div class="fee-sub">Hàng tháng</div>
+                </td>
+                <td><span class="fee-type-badge">APARTMENT_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(detail.electricFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(detail.electricFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- 5. Phí tiện ích -->
+            <tr>
+                <td>
+                    <div class="fee-name"><i class="bi bi-star-fill me-2" style="color:#ec4899;"></i>Phí tiện ích</div>
+                    <div class="fee-sub">Hàng tháng</div>
+                </td>
+                <td><span class="fee-type-badge">APARTMENT_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(detail.utilityFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(detail.utilityFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- 6. Dịch vụ đã đăng ký -->
+            <tr th:each="svc : ${detail.serviceLines}">
+                <td>
+                    <div class="fee-name"><i class="bi bi-check2-square me-2" style="color:#a78bfa;"></i><span th:text="${svc.serviceName}"></span></div>
+                    <div class="fee-sub">
+                        Dịch vụ đăng ký
+                        <span th:if="${svc.status == 'DA_THANH_TOAN'}" class="badge-paid ms-1">Đã TT</span>
+                        <span th:if="${svc.status == 'CHUA_THANH_TOAN'}" class="badge-unpaid ms-1">Chưa TT</span>
+                    </div>
+                </td>
+                <td><span class="fee-type-badge svc-badge">SERVICE_FEE</span></td>
+                <td>1.000</td>
+                <td th:text="${#numbers.formatDecimal(svc.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                <td class="fee-amount" style="text-align:right;" th:text="${#numbers.formatDecimal(svc.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+            </tr>
+
+            <!-- ===== Chi phí tháng ===== -->
+            <tr class="total-row">
+                <td colspan="4"><div class="fee-name"><i class="bi bi-calculator me-2" style="color:#059669;"></i>Chi phí tháng</div></td>
+                <td style="text-align:right;">
+                    <span class="fee-amount-green" th:text="${#numbers.formatDecimal(detail.totalMonthly, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                </td>
+            </tr>
+
+            <!-- ===== Phí phạt ===== -->
+            <tr class="total-row" style="border-top:none;">
+                <td colspan="4" style="border-top:none !important;"><div class="fee-name"><i class="bi bi-exclamation-triangle me-2" style="color:#d97706;"></i>Phí phạt</div></td>
+                <td style="text-align:right; border-top:none !important;">
+                    <span class="fee-amount-orange">0 VND</span>
+                </td>
+            </tr>
+
+            <!-- ===== GRAND TOTAL ===== -->
+            <tr class="grand-total-row">
+                <td colspan="4"><div class="fee-name" style="font-size:1.1rem; font-weight:800;"><i class="bi bi-receipt-cutoff me-2"></i>Tổng phải thanh toán</div></td>
+                <td style="text-align:right;">
+                    <span class="fee-amount-teal" th:text="${#numbers.formatDecimal(detail.totalMonthly, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ========== TOTAL BAR ========== -->
+    <div th:if="${!#lists.isEmpty(details)}"
+         th:with="catName=${chungCu.category != null ? chungCu.category.name : ''}"
+         class="total-bar"
+         th:classappend="${#strings.containsIgnoreCase(catName, 'Bình dân') ? 'total-bar-binh-dan' : (#strings.containsIgnoreCase(catName, 'Trung cấp') ? 'total-bar-trung-cap' : (#strings.containsIgnoreCase(catName, 'Cao cấp') ? 'total-bar-cao-cap' : 'total-bar-default'))}">
+        <div class="total-label">
+            <i class="bi bi-receipt-cutoff me-2"></i>Tổng chi phí hàng tháng (tất cả cư dân)
+        </div>
+        <div class="total-amount" th:if="${#lists.size(details) == 1}"
+             th:text="${#numbers.formatDecimal(details[0].totalMonthly, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</div>
+        <div class="total-amount" th:if="${#lists.size(details) > 1}">
+            <span th:text="${#lists.size(details)}"></span> hóa đơn
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

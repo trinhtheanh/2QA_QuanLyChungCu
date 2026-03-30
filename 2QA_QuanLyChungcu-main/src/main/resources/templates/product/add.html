@@ -17,6 +17,11 @@
             <p class="text-muted mb-0">Thiết lập thông số căn hộ và hình ảnh để cư dân có thể theo dõi.</p>
         </div>
 
+        <div th:if="${error}" class="alert alert-danger d-flex align-items-center mb-4" role="alert" style="border-radius: 8px;">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+            <div th:text="${error}"></div>
+        </div>
+
         <form th:action="@{/Apartments/save}" th:object="${product}" method="post"
               enctype="multipart/form-data">
 
@@ -53,7 +58,7 @@
 
                 <div class="form-group mb-3">
                     <label for="displayPrice" class="form-label">Giá thuê / Giá dịch vụ (VNĐ)</label>
-                    <input class="form-control" type="text" id="displayPrice"
+                    <input class="form-control" type="text" id="displayPrice" name="displayPrice"
                            placeholder="VD: 15.000.000" oninput="formatCurrency(this)">
 
                     <input type="hidden" th:field="*{price}" id="price">

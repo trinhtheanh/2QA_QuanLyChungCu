@@ -23,11 +23,11 @@
   </div>
 
   <div class="filter-tabs no-scrollbar">
-    <a href="#" class="filter-tab active">Tất cả</a>
-    <a href="#" class="filter-tab">Thông báo chung</a>
-    <a href="#" class="filter-tab">Sự kiện</a>
-    <a href="#" class="filter-tab">Nội quy</a>
-    <a href="#" class="filter-tab">Khẩn cấp</a>
+    <a th:href="@{/tintuc}" th:classappend="${currentLoai == null ? 'active' : ''}" class="filter-tab">Tất cả</a>
+    <a th:href="@{/tintuc(loai='THONG_BAO_CHUNG')}" th:classappend="${currentLoai == 'THONG_BAO_CHUNG' ? 'active' : ''}" class="filter-tab">Thông báo chung</a>
+    <a th:href="@{/tintuc(loai='LICH_CAT_DIEN_NUOC')}" th:classappend="${currentLoai == 'LICH_CAT_DIEN_NUOC' ? 'active' : ''}" class="filter-tab">Lịch / Sự kiện</a>
+    <a th:href="@{/tintuc(loai='NOI_QUY')}" th:classappend="${currentLoai == 'NOI_QUY' ? 'active' : ''}" class="filter-tab">Nội quy</a>
+    <a th:href="@{/tintuc(loai='TIN_KHAN_CAP')}" th:classappend="${currentLoai == 'TIN_KHAN_CAP' ? 'active' : ''}" class="filter-tab">Khẩn cấp</a>
   </div>
 
   <div class="row g-4" th:if="${thongbaos != null and !thongbaos.isEmpty()}">

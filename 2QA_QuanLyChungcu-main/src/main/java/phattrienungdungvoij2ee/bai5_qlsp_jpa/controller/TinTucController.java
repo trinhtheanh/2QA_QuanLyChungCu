@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.service.ThongBaoService;
 
 @Controller
@@ -15,9 +16,13 @@ public class TinTucController {
     private ThongBaoService thongBaoService;
 
     @GetMapping
-    public String listTinTuc(Model model) {
-        // Lay tat ca thong bao de hien thi nhu tin tuc / su kien
-        model.addAttribute("thongbaos", thongBaoService.getAllThongBao());
+    public String listTinTuc(@RequestParam(value = "loai", required = false) String loai, Model model) {
+        if (loai != null && !loai.isEmpty()) {
+            model.addAttribute("thongbaos", thongBaoService.getByLoai(loai));
+        } else {
+            model.addAttribute("thongbaos", thongBaoService.getAllThongBao());
+        }
+        model.addAttribute("currentLoai", loai);
         return "tintuc/list";
     }
 }

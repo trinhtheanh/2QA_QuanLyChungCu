@@ -90,10 +90,16 @@
     <div class="row g-4 mb-5">
       <div class="col-lg-8">
         <div class="activity-section">
-          <div class="section-header d-flex justify-content-between align-items-center">
+          <div class="section-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0 fw-bold"><i class="bi bi-building-check me-2 text-primary"></i>Quản lý Căn hộ</h5>
-            <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-2">
-              <a th:href="@{/Apartments/add}" class="btn btn-primary btn-sm px-3 rounded-pill">Thêm căn hộ</a>
+            <div class="d-flex gap-2 align-items-center">
+              <select class="form-select form-select-sm border-primary text-primary" style="width: 200px; border-radius: 20px; font-weight: 500;" onchange="filterApartmentsByCategory(this)">
+                <option value="ALL">Tất cả loại phòng</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+              </select>
+              <div sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/Apartments/add}" class="btn btn-primary btn-sm px-3 rounded-pill">Thêm căn hộ</a>
+              </div>
             </div>
           </div>
           <div class="section-body">
@@ -109,7 +115,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="product : ${products}">
+                <tr th:each="product : ${products}" class="apt-row" th:data-category-id="${product.category != null ? product.category.id : ''}">
                   <td class="text-muted fw-bold" th:text="'#' + ${product.id}"></td>
                   <td class="fw-bold text-dark" th:text="${product.name}"></td>
                   <td>
@@ -117,6 +123,7 @@
                   </td>
                   <td class="text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                   <td sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/Apartments/detail/{id}(id=${product.id})}" class="btn-action btn-view" style="color: #6366f1; background: #e0e7ff;" title="Xem chi phí chi tiết"><i class="bi bi-eye"></i></a>
                     <a th:href="@{/Apartments/edit/{id}(id=${product.id})}" class="btn-action btn-edit"><i class="bi bi-pencil-square"></i></a>
                     <a th:href="@{/Apartments/delete/{id}(id=${product.id})}" class="btn-action btn-delete" onclick="return confirm('Xác nhận xóa?')"><i class="bi bi-trash3"></i></a>
                   </td>
@@ -190,6 +197,22 @@
     </div>
 
   </div>
+  
+  <script>
+    function filterApartmentsByCategory(selectElement) {
+      const selectedCategoryId = selectElement.value;
+      const rows = document.querySelectorAll('.apt-row');
+      
+      rows.forEach(row => {
+          const rowCategoryId = row.getAttribute('data-category-id');
+          if (selectedCategoryId === 'ALL' || selectedCategoryId === rowCategoryId) {
+              row.style.display = '';
+          } else {
+              row.style.display = 'none';
+          }
+      });
+    }
+  </script>
 </div>
 
 </body>

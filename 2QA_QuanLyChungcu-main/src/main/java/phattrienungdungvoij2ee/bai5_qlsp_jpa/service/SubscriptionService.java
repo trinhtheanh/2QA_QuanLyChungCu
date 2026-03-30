@@ -27,7 +27,7 @@ public class SubscriptionService {
     public Subscription subscribe(Account user, Dichvu dichvu) {
         // Kiem tra da dang ky chua
         if (subscriptionRepository.existsByUserIdAndServiceEntityId(user.getId(), dichvu.getId())) {
-            throw new RuntimeException("Ban da dang ky dich vu nay roi!");
+            throw new RuntimeException("Bạn đã đăng ký dịch vụ này rồi!");
         }
 
         // Tao subscription

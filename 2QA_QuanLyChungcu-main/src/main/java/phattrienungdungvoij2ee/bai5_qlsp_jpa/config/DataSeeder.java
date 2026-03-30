@@ -62,11 +62,11 @@ public class DataSeeder implements CommandLineRunner {
 
     // ------------------------------------------------------------------ ROLES
     private List<Role> seedRoles() {
-        Role admin = roleRepo.findByName("ADMIN").orElseGet(() -> {
-            Role r = new Role(); r.setName("ADMIN"); return roleRepo.save(r);
+        Role admin = roleRepo.findByName("ROLE_ADMIN").orElseGet(() -> {
+            Role r = new Role(); r.setName("ROLE_ADMIN"); return roleRepo.save(r);
         });
-        Role user = roleRepo.findByName("USER").orElseGet(() -> {
-            Role r = new Role(); r.setName("USER"); return roleRepo.save(r);
+        Role user = roleRepo.findByName("ROLE_USER").orElseGet(() -> {
+            Role r = new Role(); r.setName("ROLE_USER"); return roleRepo.save(r);
         });
         return List.of(admin, user);
     }
@@ -113,7 +113,7 @@ public class DataSeeder implements CommandLineRunner {
         Role adminRole = roles.get(0);
         Role userRole  = roles.get(1);
 
-        Account admin = findOrCreateAccount("admin.css", "Admin@123", Set.of(adminRole), null, null);
+        Account admin = findOrCreateAccount("admin", "Admin@123", Set.of(adminRole), null, null);
         Account cu1   = findOrCreateAccount("nguyen.van.a", "User@123", Set.of(userRole), ccs.get(0), "A1-101");
         Account cu2   = findOrCreateAccount("tran.thi.b",   "User@123", Set.of(userRole), ccs.get(0), "A1-202");
         Account cu3   = findOrCreateAccount("le.van.c",     "User@123", Set.of(userRole), ccs.get(1), "B2-305");
