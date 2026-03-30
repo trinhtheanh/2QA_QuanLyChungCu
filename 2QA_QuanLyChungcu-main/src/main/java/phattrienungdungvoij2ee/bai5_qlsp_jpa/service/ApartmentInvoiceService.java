@@ -71,9 +71,12 @@ public class ApartmentInvoiceService {
             if (!isRole(u, "ROLE_USER")) {
                 continue;
             }
+            
+            // 1. Lấy hóa đơn chung cư (Tổng hợp)
             List<InvoiceView> invoices = getInvoicesForUser(u);
             for (InvoiceView inv : invoices) {
                 rows.add(new AdminInvoiceView(
+                        "CHUNG_CU", "Phí tổng hợp căn hộ",
                         u.getLogin_name(),
                         u.getRoom(),
                         (u.getChungCu().getMaChungCu() != null ? u.getChungCu().getMaChungCu() : String.valueOf(u.getChungCu().getId())),
@@ -83,7 +86,45 @@ public class ApartmentInvoiceService {
                         inv.totalToPay
                 ));
             }
+            
+            // 2. Lấy Các thanh toán Dịch vụ riêng lẻ
+            List<Payment> servicesPayments = paymentRepository.findBySubscriptionUserId(u.getId());
+            if (servicesPayments != null) {
+                for (Payment p : servicesPayments) {
+                    if (p.getSubscription() == null) continue;
+                    
+                    String sname = "Dịch vụ (Không rõ)";
+                    if (p.getSubscription().getServiceEntity() != null) {
+                        sname = p.getSubscription().getServiceEntity().getName();
+                    }
+                    
+                    String monthDisp = "DK Mới"; // Mac dinh
+                    if (p.getSubscription().getCreatedAt() != null) {
+                        monthDisp = p.getSubscription().getCreatedAt().toLocalDate().toString(); 
+                    }
+                    
+                    String statusStr = "RED"; // Mac dinh la CHUA_THANH_TOAN
+                    if ("DA_THANH_TOAN".equalsIgnoreCase(p.getStatus())) {
+                        statusStr = "GREEN";
+                    } else if ("DANG_XU_LY".equalsIgnoreCase(p.getStatus())) {
+                        statusStr = "YELLOW";
+                    }
+
+                    rows.add(new AdminInvoiceView(
+                            "DICH_VU", sname,
+                            u.getLogin_name(),
+                            u.getRoom(),
+                            (u.getChungCu().getMaChungCu() != null ? u.getChungCu().getMaChungCu() : String.valueOf(u.getChungCu().getId())),
+                            u.getChungCu().getName(),
+                            monthDisp,
+                            statusStr,
+                            (p.getAmount() != null) ? p.getAmount() : BigDecimal.ZERO
+                    ));
+                }
+            }
         }
+        
+        // Sap xep giảm dần theo Tháng/Ngày tạo
         rows.sort(Comparator.comparing((AdminInvoiceView x) -> x.monthDisplay).reversed());
         return rows;
     }
@@ -432,6 +473,8 @@ public class ApartmentInvoiceService {
     }
 
     public static class AdminInvoiceView {
+        public final String invoiceType; // CHUNG_CU or DICH_VU
+        public final String serviceName; // Null/Tong hop if CHUNG_CU
         public final String username;
         public final String room;
         public final String apartmentCode;
@@ -440,8 +483,11 @@ public class ApartmentInvoiceService {
         public final String status;
         public final BigDecimal totalToPay;
 
-        public AdminInvoiceView(String username, String room, String apartmentCode, String apartmentName,
+        public AdminInvoiceView(String invoiceType, String serviceName, 
+                                String username, String room, String apartmentCode, String apartmentName,
                                 String monthDisplay, String status, BigDecimal totalToPay) {
+            this.invoiceType = invoiceType;
+            this.serviceName = serviceName;
             this.username = username;
             this.room = room;
             this.apartmentCode = apartmentCode;
@@ -449,6 +495,177 @@ public class ApartmentInvoiceService {
             this.monthDisplay = monthDisplay;
             this.status = status;
             this.totalToPay = totalToPay;
+        }
+    }
+
+    // ===== Phí cố định (dùng cho ApartmentDetailView) =====
+    private static final BigDecimal DEPOSIT_RATE = new BigDecimal("0.02");          // 2%
+    private static final BigDecimal MANAGEMENT_FEE = new BigDecimal("500000");      // 500k
+    private static final BigDecimal ELECTRIC_FEE = new BigDecimal("800000");        // 800k
+    private static final BigDecimal UTILITY_FEE = new BigDecimal("300000");         // 300k
+
+    // ===== APARTMENT DETAIL VIEW (cho trang xem chi tiết căn hộ) =====
+    public ApartmentDetailView getApartmentDetail(Account user) {
+        if (user == null || user.getChungCu() == null) {
+            return null;
+        }
+        ChungCu chungCu = user.getChungCu();
+        BigDecimal rentPrice = BigDecimal.valueOf(chungCu.getPrice());
+        BigDecimal deposit = rentPrice.multiply(DEPOSIT_RATE).setScale(0, RoundingMode.HALF_UP);
+
+        // Dịch vụ đã đăng ký
+        List<Subscription> subs = subscriptionRepository.findByUserId(user.getId());
+        List<Payment> allPayments = paymentRepository.findBySubscriptionUserId(user.getId());
+
+        List<ServiceLineItem> serviceLines = new ArrayList<>();
+        BigDecimal totalServiceFee = BigDecimal.ZERO;
+
+        for (Subscription sub : subs) {
+            if (sub.getServiceEntity() != null) {
+                String name = sub.getServiceEntity().getName();
+                BigDecimal price = sub.getServiceEntity().getPrice() != null ? sub.getServiceEntity().getPrice() : BigDecimal.ZERO;
+
+                // Tìm payment status
+                String status = "CHUA_THANH_TOAN";
+                for (Payment p : allPayments) {
+                    if (p.getSubscription() != null && p.getSubscription().getId().equals(sub.getId())) {
+                        status = p.getStatus();
+                        break;
+                    }
+                }
+
+                serviceLines.add(new ServiceLineItem(name, price, status));
+                totalServiceFee = totalServiceFee.add(price);
+            }
+        }
+
+        // Tổng tất cả phí
+        BigDecimal totalApartmentFees = rentPrice.add(deposit).add(MANAGEMENT_FEE).add(ELECTRIC_FEE).add(UTILITY_FEE);
+        BigDecimal totalMonthly = totalApartmentFees.add(totalServiceFee);
+
+        return new ApartmentDetailView(
+                user.getLogin_name(),
+                user.getRoom(),
+                chungCu.getName(),
+                chungCu.getMaChungCu() != null ? chungCu.getMaChungCu() : String.valueOf(chungCu.getId()),
+                rentPrice,
+                deposit,
+                MANAGEMENT_FEE,
+                ELECTRIC_FEE,
+                UTILITY_FEE,
+                totalServiceFee,
+                serviceLines,
+                totalMonthly
+        );
+    }
+
+    // ===== SINGLE INVOICE VIEW (cho compatibility) =====
+    public InvoiceView getInvoiceForUser(Account user) {
+        List<InvoiceView> invoices = getInvoicesForUser(user);
+        if (invoices == null || invoices.isEmpty()) {
+            return null;
+        }
+        return invoices.get(0); // Trả về hóa đơn gần nhất
+    }
+
+    // ===== ADMIN: Theo dõi thanh toán dịch vụ =====
+    public List<ServicePaymentAdminView> getServicePaymentsForAdmin() {
+        List<Subscription> all = subscriptionRepository.findAll();
+        List<Payment> allPayments = paymentRepository.findAll();
+        List<ServicePaymentAdminView> result = new ArrayList<>();
+
+        for (Subscription sub : all) {
+            if (sub.getUser() == null || sub.getServiceEntity() == null) continue;
+            Account u = sub.getUser();
+            Dichvu dv = sub.getServiceEntity();
+
+            String status = "CHUA_THANH_TOAN";
+            for (Payment p : allPayments) {
+                if (p.getSubscription() != null && p.getSubscription().getId().equals(sub.getId())) {
+                    status = p.getStatus();
+                    break;
+                }
+            }
+
+            result.add(new ServicePaymentAdminView(
+                    u.getLogin_name(),
+                    u.getRoom(),
+                    u.getChungCu() != null ? u.getChungCu().getName() : "N/A",
+                    dv.getName(),
+                    dv.getPrice() != null ? dv.getPrice() : BigDecimal.ZERO,
+                    status,
+                    sub.getCreatedAt() != null ? sub.getCreatedAt().toString() : ""
+            ));
+        }
+        return result;
+    }
+
+    // ===== VIEW CLASSES từ source =====
+
+    public static class ApartmentDetailView {
+        public final String username;
+        public final String room;
+        public final String apartmentName;
+        public final String apartmentCode;
+        public final BigDecimal rentPrice;
+        public final BigDecimal deposit;
+        public final BigDecimal managementFee;
+        public final BigDecimal electricFee;
+        public final BigDecimal utilityFee;
+        public final BigDecimal totalServiceFee;
+        public final List<ServiceLineItem> serviceLines;
+        public final BigDecimal totalMonthly;
+
+        public ApartmentDetailView(String username, String room, String apartmentName, String apartmentCode,
+                                   BigDecimal rentPrice, BigDecimal deposit, BigDecimal managementFee,
+                                   BigDecimal electricFee, BigDecimal utilityFee,
+                                   BigDecimal totalServiceFee, List<ServiceLineItem> serviceLines,
+                                   BigDecimal totalMonthly) {
+            this.username = username;
+            this.room = room;
+            this.apartmentName = apartmentName;
+            this.apartmentCode = apartmentCode;
+            this.rentPrice = rentPrice;
+            this.deposit = deposit;
+            this.managementFee = managementFee;
+            this.electricFee = electricFee;
+            this.utilityFee = utilityFee;
+            this.totalServiceFee = totalServiceFee;
+            this.serviceLines = serviceLines;
+            this.totalMonthly = totalMonthly;
+        }
+    }
+
+    public static class ServiceLineItem {
+        public final String serviceName;
+        public final BigDecimal price;
+        public final String status; // DA_THANH_TOAN or CHUA_THANH_TOAN
+
+        public ServiceLineItem(String serviceName, BigDecimal price, String status) {
+            this.serviceName = serviceName;
+            this.price = price;
+            this.status = status;
+        }
+    }
+
+    public static class ServicePaymentAdminView {
+        public final String username;
+        public final String room;
+        public final String apartmentName;
+        public final String serviceName;
+        public final BigDecimal amount;
+        public final String status;
+        public final String createdAt;
+
+        public ServicePaymentAdminView(String username, String room, String apartmentName,
+                                       String serviceName, BigDecimal amount, String status, String createdAt) {
+            this.username = username;
+            this.room = room;
+            this.apartmentName = apartmentName;
+            this.serviceName = serviceName;
+            this.amount = amount;
+            this.status = status;
+            this.createdAt = createdAt;
         }
     }
 }

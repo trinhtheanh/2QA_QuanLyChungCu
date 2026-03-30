@@ -70,24 +70,32 @@ public class RegisterController {
             if ("ROLE_USER".equals(roleName) && chungCuId != null) {
                 Optional<ChungCu> chungCuOpt = chungCuRepository.findById(chungCuId);
                 if (chungCuOpt.isPresent()) {
+                    // Kiem tra xem chung cu da co ai dang ky chua
+                    java.util.List<Account> existingResidents = accountRepository.findByChungCuId(chungCuId);
+                    if (!existingResidents.isEmpty()) {
+                        redirectAttributes.addFlashAttribute("registerError",
+                                String.format("Mã chung cư '%s' đã được gán cho tài khoản khác! Vui lòng chọn mã khác.", chungCuId));
+                        redirectAttributes.addFlashAttribute("openRegister", true);
+                        return "redirect:/login";
+                    }
                     account.setChungCu(chungCuOpt.get());
                     if (room != null && !room.trim().isEmpty()) {
                         account.setRoom(room.trim());
                     }
                 } else {
                     redirectAttributes.addFlashAttribute("registerError",
-                            String.format("Ma chung cu '%s' khong ton tai! Vui long kiem tra lai.", chungCuId));
+                            String.format("Mã chung cư '%s' không tồn tại! Vui lòng kiểm tra lại.", chungCuId));
                     redirectAttributes.addFlashAttribute("openRegister", true);
                     return "redirect:/login";
                 }
             }
 
             accountRepository.save(account);
-            redirectAttributes.addFlashAttribute("registerSuccess", "Dang ky thanh cong! Vui long dang nhap.");
+            redirectAttributes.addFlashAttribute("registerSuccess", "Đăng ký thành công! Vui lòng đăng nhập.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute(
                     "registerError",
-                    String.format("Luu that bai: %s", e.getMessage())
+                    String.format("Lưu thất bại: %s", e.getMessage())
             );
             redirectAttributes.addFlashAttribute("openRegister", true);
         }

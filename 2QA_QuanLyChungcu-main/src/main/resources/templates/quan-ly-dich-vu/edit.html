@@ -72,7 +72,7 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="displayPrice" class="form-label">Giá bán (VND) <span class="text-danger">*</span></label>
-                            <input class="form-control fw-bold text-primary" type="text" id="displayPrice" oninput="formatCurrency(this)">
+                            <input class="form-control fw-bold text-primary" type="text" id="displayPrice" name="displayPrice" oninput="formatCurrency(this)">
                             <input type="hidden" th:field="*{price}" id="price">
                         </div>
                     </div>

@@ -39,6 +39,7 @@ public class ServiceManagementController {
     @GetMapping
     public String listServices(Model model) {
         model.addAttribute("services", dichvuService.getAllServices());
+        model.addAttribute("categories", categoryDichvuService.getAllCategories());
         return "quan-ly-dich-vu/list";
     }
 
@@ -56,7 +57,19 @@ public class ServiceManagementController {
     @PostMapping("/save")
     public String saveService(@ModelAttribute("service") Dichvu dichvu,
                               @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                              @RequestParam(value = "displayPrice", required = false) String displayPrice,
                               RedirectAttributes redirectAttributes) {
+        
+        // Fix Spring Form không map được price do the hidden ko được cập nhật
+        if (dichvu.getPrice() == null && displayPrice != null && !displayPrice.trim().isEmpty()) {
+            try {
+                String cleanPrice = displayPrice.replaceAll("\\D", "");
+                if(!cleanPrice.isEmpty()) {
+                    dichvu.setPrice(new java.math.BigDecimal(cleanPrice));
+                }
+            } catch (Exception ignored) {}
+        }
+        
         try {
             // Neu dang sua va khong upload anh moi, giu nguyen anh cu
             if (dichvu.getId() != null) {

@@ -19,7 +19,6 @@ public class HoaDonAdminController {
     @GetMapping("/hoa-don/admin")
     public String allInvoices(Model model) {
         model.addAttribute("items", invoiceService.getInvoicesForAdminManager(accountRepository.findAll()));
-        return "hoa-don/admin.html";
+        return "hoa-don/admin";
     }
 }
-
