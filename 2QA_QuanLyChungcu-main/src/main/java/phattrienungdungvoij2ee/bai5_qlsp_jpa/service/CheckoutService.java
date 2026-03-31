@@ -6,8 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.Account;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.CheckoutRequest;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ChungCu;
+import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.Payment;
+import phattrienungdungvoij2ee.bai5_qlsp_jpa.model.Subscription;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.AccountRepository;
 import phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.CheckoutRequestRepository;
+import phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.PaymentRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,6 +32,12 @@ public class CheckoutService {
 
     @Autowired
     private phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.ApartmentMonthlyBillRepository billRepository;
+
+    @Autowired
+    private phattrienungdungvoij2ee.bai5_qlsp_jpa.repository.ApartmentBillDetailRepository billDetailRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     // Tiền cọc lúc đầu được tính bằng 1 tháng tiền thuê
     public CheckoutRequest createRequest(Account account) throws Exception {
@@ -85,33 +94,42 @@ public class CheckoutService {
         request.setAdminNote(adminNote);
         request.setStatus("APPROVED");
 
-        // Go lien ket can ho ngay lap tuc
+        // Lay account truoc khi cat lien ket
         Account account = request.getAccount();
+
+        // Cat lien ket account khoi don (de giu lich su don ma khong bi cascade xoa)
+        request.setAccount(null);
+        checkoutRequestRepository.save(request);
+
         if (account != null) {
-            // 1. Cat dut khoa ngoai tren bang Yeu Cau (De lam lich su an danh)
-            List<CheckoutRequest> reqs = checkoutRequestRepository.findByAccountId(account.getId());
-            for (CheckoutRequest r : reqs) { r.setAccount(null); }
-            checkoutRequestRepository.saveAll(reqs);
+            // 1. Xoa Payment cua tung Subscription truoc
+            List<Subscription> subs = subscriptionRepository.findByUserId(account.getId());
+            for (Subscription s : subs) {
+                List<Payment> payments = paymentRepository.findBySubscriptionId(s.getId());
+                paymentRepository.deleteAll(payments);
+            }
+            // 2. Xoa Subscription
+            subscriptionRepository.deleteAll(subs);
 
-            // 2. Cat dut khoa ngoai tren bang Dang ky Dich vu
-            List<phattrienungdungvoij2ee.bai5_qlsp_jpa.model.Subscription> subs = subscriptionRepository.findByUserId(account.getId());
-            for (phattrienungdungvoij2ee.bai5_qlsp_jpa.model.Subscription s : subs) { s.setUser(null); }
-            subscriptionRepository.saveAll(subs);
-
-            // 3. Cat dut khoa ngoai tren bang Hoa don thang
-            List<phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentMonthlyBill> bills = billRepository.findByAccountIdOrderByMonthKeyDesc(account.getId());
-            for (phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentMonthlyBill b : bills) { b.setAccount(null); }
-            billRepository.saveAll(bills);
+            // 3. Xoa BillDetail truoc, sau do xoa Hoa don thang
+            List<phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentMonthlyBill> bills =
+                    billRepository.findByAccountIdOrderByMonthKeyDesc(account.getId());
+            for (phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentMonthlyBill b : bills) {
+                List<phattrienungdungvoij2ee.bai5_qlsp_jpa.model.ApartmentBillDetail> details =
+                        billDetailRepository.findByBillIdOrderByIdAsc(b.getId());
+                billDetailRepository.deleteAll(details);
+            }
+            billRepository.deleteAll(bills);
 
             // 4. Xoa Roles trung gian
             account.getRoles().clear();
             accountRepository.save(account);
 
-            // 5. Xoa han Account ra khoi he thong
+            // 5. Xoa Account
             accountRepository.delete(account);
         }
 
-        return checkoutRequestRepository.save(request);
+        return checkoutRequestRepository.findById(id).orElse(request);
     }
 
     @Transactional
