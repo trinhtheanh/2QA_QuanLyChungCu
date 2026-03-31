@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Hoàn tiền & Trả phòng</title>
+</head>
+<body>
+<div layout:fragment="content" class="container-fluid p-0">
+    <div class="row mb-4 align-items-center">
+        <div class="col-auto">
+            <h3 class="mb-0 fw-bold text-dark"><i class="bi bi-box-arrow-left me-2 text-danger"></i>Quản lý Hoàn tiền &amp; Trả phòng</h3>
+            <p class="text-muted mb-0 mt-1">Kiểm duyệt các yêu cầu trả phòng từ cư dân và tính toán tiền cọc.</p>
+        </div>
+    </div>
+
+    <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMsg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMsg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Mã Đơn</th>
+                        <th>Cư dân</th>
+                        <th>Căn hộ</th>
+                        <th>Thời gian gửi</th>
+                        <th>Tiền Cọc Thuê</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center pe-4">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(requests)}">
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                            Chưa có yêu cầu trả phòng nào.
+                        </td>
+                    </tr>
+                    <tr th:each="r : ${requests}">
+                        <td class="ps-4 fw-bold text-muted">#[[${r.id}]]</td>
+                        <td class="fw-bold">
+                            [[${r.account != null ? r.account.login_name : 'Unknown User'}]]
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border"><i class="bi bi-building me-1"></i>[[${r.chungCu != null ? r.chungCu.name : 'Đã gỡ'}]]</span>
+                        </td>
+                        <td th:text="${#temporals.format(r.requestDate, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="fw-bold text-primary">
+                            [[${#numbers.formatDecimal(r.depositAmount, 0, 'COMMA', 0, 'POINT')}]] đ
+                        </td>
+                        <td>
+                            <span th:if="${r.status == 'PENDING'}" class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Đang chờ</span>
+                            <span th:if="${r.status == 'APPROVED'}" class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Đã duyệt</span>
+                            <span th:if="${r.status == 'REJECTED'}" class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Từ chối</span>
+                        </td>
+                        <td class="text-center pe-4">
+                            <!-- Nút mở Modal Duyệt (Chỉ mở khi status = PENDING) -->
+                            <button th:if="${r.status == 'PENDING'}" type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" th:data-bs-target="'#approveModal' + ${r.id}">
+                                Duyệt
+                            </button>
+                            <!-- Nút mở Modal Từ chối -->
+                            <button th:if="${r.status == 'PENDING'}" type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" th:data-bs-target="'#rejectModal' + ${r.id}">
+                                Từ chối
+                            </button>
+                            <!-- Nút Xem chi tiết nếu đã xong -->
+                            <button th:if="${r.status != 'PENDING'}" type="button" class="btn btn-sm btn-light border" data-bs-toggle="modal" th:data-bs-target="'#infoModal' + ${r.id}">
+                                <i class="bi bi-info-circle"></i> Chi tiết
+                            </button>
+
+                            <!-- ================= MODAL DUYỆT (APPROVE) ================= -->
+                            <div th:if="${r.status == 'PENDING'}" class="modal fade" th:id="'approveModal' + ${r.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-start">
+                                    <div class="modal-content border-0 shadow">
+                                        <form th:action="@{/admin/checkout/approve/{id}(id=${r.id})}" method="post">
+                                            <div class="modal-header bg-success text-white border-0">
+                                                <h5 class="modal-title"><i class="bi bi-check2-circle me-2"></i>Duyệt đơn trả phòng #[[${r.id}]]</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body bg-light">
+                                                <div class="alert alert-warning py-2 mb-4" style="font-size: 0.9rem;">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                    <strong>Lưu ý:</strong> Hành động này sẽ ngay lập tức gỡ tài khoản cư dân khỏi căn hộ.
+                                                </div>
+                                                <div class="fw-bold mb-3 fs-5 text-center text-primary">
+                                                    Tổng Cọc (Nền): [[${#numbers.formatDecimal(r.depositAmount, 0, 'COMMA', 0, 'POINT')}]] đ
+                                                </div>
+                                                
+                                                <label class="form-label fw-bold mt-2">Tính các khoản trừ (VND):</label>
+                                                <div class="input-group mb-3 shadow-sm">
+                                                    <span class="input-group-text bg-white" style="width: 140px;">Phí phạt HĐ</span>
+                                                    <input type="number" name="penaltyFee" class="form-control" value="0" min="0" step="1000" required>
+                                                </div>
+                                                <div class="input-group mb-3 shadow-sm">
+                                                    <span class="input-group-text bg-white" style="width: 140px;">Phí sửa chữa</span>
+                                                    <input type="number" name="repairFee" class="form-control" value="0" min="0" step="1000" required>
+                                                </div>
+                                                <div class="input-group mb-3 shadow-sm">
+                                                    <span class="input-group-text bg-white" style="width: 140px;">Phí vệ sinh</span>
+                                                    <input type="number" name="cleaningFee" class="form-control" value="0" min="0" step="1000" required>
+                                                </div>
+
+                                                <label class="form-label fw-bold">Ghi chú cho Cư dân (Tùy chọn):</label>
+                                                <textarea name="adminNote" class="form-control shadow-sm" rows="2" placeholder="Lý do trừ tiền..."></textarea>
+                                            </div>
+                                            <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-success fw-bold px-4">Xác nhận Trừ & Hoàn Tiền</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= MODAL TỪ CHỐI (REJECT) ================= -->
+                            <div th:if="${r.status == 'PENDING'}" class="modal fade" th:id="'rejectModal' + ${r.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-start">
+                                    <div class="modal-content border-0 shadow">
+                                        <form th:action="@{/admin/checkout/reject/{id}(id=${r.id})}" method="post">
+                                            <div class="modal-header bg-danger text-white border-0">
+                                                <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Từ chối đơn trả phòng #[[${r.id}]]</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Bạn có chắc chắn muốn từ chối yêu cầu trả phòng của cư dân này?</p>
+                                                <label class="form-label fw-bold">Lý do từ chối:</label>
+                                                <textarea name="adminNote" class="form-control" rows="3" required placeholder="Nhập lý do..."></textarea>
+                                            </div>
+                                            <div class="modal-footer border-0">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy bỏ</button>
+                                                <button type="submit" class="btn btn-danger">Xác nhận Từ chối</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= MODAL INFO DELETED ================= -->
+                            <div th:if="${r.status != 'PENDING'}" class="modal fade" th:id="'infoModal' + ${r.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered text-start">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header border-0 pb-0">
+                                            <h5 class="modal-title fw-bold">Chi tiết hóa đơn hoàn tiền</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul class="list-group list-group-flush mb-3">
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    Tiền cọc gốc
+                                                    <span class="fw-bold">[[${#numbers.formatDecimal(r.depositAmount, 0, 'COMMA', 0, 'POINT')}]] đ</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center text-danger">
+                                                    - Phí phạt HĐ
+                                                    <span>[[${#numbers.formatDecimal(r.penaltyFee, 0, 'COMMA', 0, 'POINT')}]] đ</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center text-danger">
+                                                    - Phí sửa chữa
+                                                    <span>[[${#numbers.formatDecimal(r.repairFee, 0, 'COMMA', 0, 'POINT')}]] đ</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center text-danger">
+                                                    - Phí vệ sinh
+                                                    <span>[[${#numbers.formatDecimal(r.cleaningFee, 0, 'COMMA', 0, 'POINT')}]] đ</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center bg-light mt-2 rounded">
+                                                    <span class="fw-bold text-success">Số tiền THỰC HOÀN:</span>
+                                                    <span class="fw-bold text-success fs-5">[[${#numbers.formatDecimal(r.refundAmount, 0, 'COMMA', 0, 'POINT')}]] đ</span>
+                                                </li>
+                                            </ul>
+                                            <div class="p-3 bg-light rounded text-muted font-monospace" style="font-size:0.85rem;">
+                                                <i class="bi bi-chat-quote-fill me-1"></i> Ghi chú: [[${r.adminNote != null ? r.adminNote : 'Không có'}]]
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

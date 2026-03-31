@@ -736,6 +736,15 @@
             <span th:text="${#lists.size(details)}"></span> hóa đơn
         </div>
     </div>
+    <!-- ========== CHECKOUT BUTTON (ONLY FOR USER) ========== -->
+    <div sec:authorize="!hasRole('ADMIN')" class="text-center mt-4 mb-5">
+        <form th:action="@{/checkout/request}" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn gửi yêu cầu trả phòng và nhận lại tiền cọc?');">
+            <button type="submit" class="btn btn-danger btn-lg px-5" style="border-radius:30px; font-weight:700; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);">
+                <i class="bi bi-box-arrow-right me-2"></i>Trả phòng
+            </button>
+        </form>
+        <p class="text-muted mt-2" style="font-size:0.85rem;">(Hệ thống sẽ gửi yêu cầu đến Ban quản lý để kiểm tra và hoàn cọc)</p>
+    </div>
 
 </div>
 </body>
