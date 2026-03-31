@@ -1,0 +1,107 @@
+﻿commit a0e9ceeb78e1438b1d20fd5d9d1347fc43ff83fe
+Merge: 08f034a d803915
+Author: Reze <trinhtheanh3010@gmail.com>
+Date:   Tue Mar 31 09:12:55 2026 +0700
+
+    Merge branch 'develop' of https://github.com/trinhtheanh/2QA_QuanLyChungCu into feature/hoantien
+
+commit 08f034af7153c9756f931008750f6f985e201c5b
+Author: Reze <trinhtheanh3010@gmail.com>
+Date:   Tue Mar 31 02:47:21 2026 +0700
+
+    Them chuc nang Hoan tien va Tra phong can ho, xoa CSDL nguoi dung
+
+A	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/CheckoutController.java
+A	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/model/CheckoutRequest.java
+A	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/repository/CheckoutRequestRepository.java
+A	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/service/CheckoutService.java
+M	2QA_QuanLyChungcu-main/src/main/resources/application.properties
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/_layout.html
+A	2QA_QuanLyChungcu-main/src/main/resources/templates/checkout/list.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/product/detail.html
+
+commit d803915dd4d311f2f45927c47a707248b86ba600
+Merge: 81f82e8 2661471
+Author: QuangTranDepTrai <phamtran11072000@gmail.com>
+Date:   Mon Mar 30 23:56:41 2026 +0700
+
+    Merge pull request #10 from trinhtheanh/develop
+    
+    User xem chi tiß║┐t c─ân hß╗Ö
+
+commit 26614715df1f5084f2b91edfb8b7967226e30cae
+Merge: 5df28c9 81f82e8
+Author: trinhtheanh <162398175+trinhtheanh@users.noreply.github.com>
+Date:   Mon Mar 30 23:36:36 2026 +0700
+
+    Merge branch 'QuangTranDepTrai:develop' into develop
+
+commit 5df28c99508cde05c1f0b48b7e510c29c7133e34
+Author: Reze <trinhtheanh3010@gmail.com>
+Date:   Mon Mar 30 23:28:52 2026 +0700
+
+    Cho phep User hien thi va su dung chuc nang Xem chi tiet can ho trong list.html
+
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/product/list.html
+
+commit 81f82e8da4cf0e2250f777ca8eb506f6100b3512
+Merge: 8fed77f 992f838
+Author: QuangTranDepTrai <phamtran11072000@gmail.com>
+Date:   Mon Mar 30 23:27:05 2026 +0700
+
+    Merge pull request #9 from trinhtheanh/develop
+    
+    Fix xem chi tiß║┐tt c─ân hß╗Ö, th├¬m cß╗Öt tiß╗ün cß╗ìc trong file detail.html
+
+commit 992f83843c0d17183b56236a389829d94689061d
+Author: Reze <trinhtheanh3010@gmail.com>
+Date:   Mon Mar 30 23:18:07 2026 +0700
+
+    Khoi phuc giao dien detail.html chi tiet can ho
+
+A	2QA_QuanLyChungcu-main/src/main/resources/templates/product/detail.html
+
+commit 8fed77f3fe0a98d366e4f5484aa66510aa0c87b7
+Merge: 2944801 e7a7cdd
+Author: QuangTranDepTrai <phamtran11072000@gmail.com>
+Date:   Mon Mar 30 09:48:12 2026 +0700
+
+    Merge pull request #8 from QuangTranDepTrai/hotfix-View-thongbao-chitiet
+    
+    Revert "fixed-thongbao"
+
+commit 294480167b5e3f7272ef5df6e2f2ddbe557f5e47
+Merge: 45113d7 005b4e3
+Author: QuangTranDepTrai <phamtran11072000@gmail.com>
+Date:   Mon Mar 30 07:48:21 2026 +0700
+
+    Merge pull request #7 from QuangTranDepTrai/update
+    
+    Update from my one and only
+
+commit 005b4e36020ed2c898da91a543d8681238f2e9b4
+Author: QuangTranDepTrai <phamtran11072000@gmail.com>
+Date:   Mon Mar 30 07:47:24 2026 +0700
+
+    Update from my one and only
+
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/config/DataSeeder.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/config/SecurityConfig.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/ChungCuController.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/HoaDonAdminController.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/RegisterController.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/ServiceManagementController.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/controller/TinTucController.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/repository/AccountRepository.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/service/ApartmentInvoiceService.java
+M	2QA_QuanLyChungcu-main/src/main/java/phattrienungdungvoij2ee/bai5_qlsp_jpa/service/SubscriptionService.java
+M	2QA_QuanLyChungcu-main/src/main/resources/application.properties
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/_layout.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/hoa-don/admin.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/product/add.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/product/edit.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/product/list.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/quan-ly-dich-vu/add.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/quan-ly-dich-vu/edit.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/quan-ly-dich-vu/list.html
+M	2QA_QuanLyChungcu-main/src/main/resources/templates/tintuc/list.html

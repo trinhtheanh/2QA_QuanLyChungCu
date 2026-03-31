@@ -1,0 +1,16 @@
+﻿On branch develop
+Your branch is up to date with 'upstream/develop'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/main/resources/application.properties
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	status.txt
+	../src/main/resources/static/uploads/61c28211-7263-4045-a3cb-ddab0719e7b8_thiet-ke-phong-tap-the-hinh-dep.jpg
+	../src/main/resources/static/uploads/c112fd1a-37d0-496e-964c-beb6eddf2b11_thiet-ke-phong-tap-the-hinh-dep.jpg
+	../src/main/resources/static/uploads/services/3333f5f7-605f-417b-88f0-e15b74739501.png
+
+no changes added to commit (use "git add" and/or "git commit -a")
